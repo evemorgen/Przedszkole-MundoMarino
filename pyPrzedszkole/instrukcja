@@ -1,0 +1,91 @@
+PRZYGOTOWANIE SD
+1) sudo diskutil eraseDisk FAT32 DUPA MBRformat /dev/diskX
+2) diskutil unmountDisk /dev/diskX
+3) sudo dd bs=1m if=/Volumes/ADATA\ UFD/2015-05-05-raspbian-wheezy.img of=/dev/diskX
+4) PODGLĄD POSTĘPU CTRL+T (IDZIE DOSYĆ DŁUGO)
+5) opcja nr1 „Expand Filesystem”
+6) opcja nr3 „Boot into a desktop environment”
+7) opcja nr8 „advanced” - A9=audio - 2=force HDMI
+8) Finish - reboot
+
+
+HDMI AUDIO
+1) sudo nano /boot/config.txt
+2) odkomentuj hdmi_drive=2
+3) sudo reboot
+
+
+ŻEBY NIE GASŁ EKRAN
+1) sudo nano /etc/kbd/config
+2) znajdź i zmień BLANK_TIME=0 (domyślnie 30)
+3) znajdź i zmień POWERDOWN_TIME=0 (domyślnie 30)
+
+
+USTAWIENIE DATY
+1) sudo date -s "Mon Aug  12 20:14:11 UTC 2014"
+2) sudo reboot
+
+
+NA STARCIE SYSTEMU
+1) sudo nano /etc/rc.local
+2)
+exec 2> /home/pi/rc.local.log
+exec 1>&2
+set -x
+
+_IP=$(hostname -I) || true
+if [ "$_IP" ]; then
+    printf "My IP adress is %s\n" "$_IP"
+fi
+
+python /home/pi/pyPrzedszkole/allTogether.py
+2.5) ŚCIEŻKI W ALLTOGHETHER.PY muszą być BEZwzględne
+3) ctrl + o
+4) ctrl + x
+
+NA STARCIE SYSTEMU PO STARCIE X
+1) sudo nano /home/pi/.config/lxsession/LXDE-pi/autostart
+2) sudo nano /etc/xdg/lxsession/LXDE-pi/autostart - dla użytkowanika pi
+
+STATYCZNE IP (JEDNO RASPI Z BAZĄ DANYCH)
+1) sudo nano /etc/network/interfaces
+2) wklej to: (będzie w pliku na penie)
+
+auto lo
+iface lo inet loopback
+
+iface eth0 inet static
+address 192.168.1.204
+netmask 255.255.255.0
+gateway 192.168.1.1
+
+allow-hotplug wlan0
+iface wlan0 inet static
+address 192.168.1.204
+netmask 255.255.255.0
+gateway 192.168.1.1
+wpa-ssid ev_network
+wpa-psk $QuOS1911
+# wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+# iface default inet dhcp
+3) ctrl + o
+4) ctrl + x
+5) sudo reboot
+
+INSTALACJA LAMP (JEDNO RASPI Z BAZĄ DANYCH)
+1) sudo apt-get install apache2 php5 libapache2-mod-php5
+2) sudo groupadd www-data
+   sudo usermod -g www-data www-data
+3) sudo service apache2 restart
+4) sudo apt-get install mysql-server mysql-client php5-mysql
+
+INSTALACJA PHPMYADMIN (JEDNO RASPI Z BAZĄ DANYCH)
+1) sudo apt-get install phpmyadmin
+2) sudo nano /etc/apache2/apache2.conf
+    dodaj na końcu linijkę:
+    Include /etc/phpmyadmin/apache.conf
+3) sudo service apache2 restart
+
+
+
+
